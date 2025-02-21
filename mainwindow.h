@@ -7,7 +7,10 @@
 
 #include <QPushButton>
 #include <QHBoxLayout>
-#include <QTextEdit>
+#include <QVBoxLayout>
+#include <QLineEdit>
+#include <QRegExpValidator>
+#include <QTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,10 +27,15 @@ public:
     ~MainWindow();
 
 public slots:
-    void testNotify();
+    void notifyButton_clicked();
+    void notify();
 
 private:
     Ui::MainWindow *ui;
     Notification *notification;
+
+    QLineEdit *hours;
+    QLineEdit *minutes;
+    QTimer *timer;
 };
 #endif // MAINWINDOW_H
