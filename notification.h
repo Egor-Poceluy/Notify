@@ -6,6 +6,8 @@
 #include <QGridLayout>
 #include <QPropertyAnimation>
 #include <QTimer>
+#include <QMediaPlayer>
+#include <QSoundEffect>
 
 class Notification : public QWidget
 {
@@ -20,16 +22,22 @@ public:
 public slots:
     void show();
     void setMessage(const QString& msg);
+    void setSound(const QString& path, int volume = 100);
 
 private slots:
-    void hideAnimation();
+    void calculateTime();
 
 private:
     float getTransparency() const noexcept;
     void setTransparency(float _transparency);
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
+    void hideAnimation();
 
+    int notificationLifeTime;
     float transparency;
+    float progress;
+
+    QSoundEffect *ring;
     QTimer* timer;
     QLabel label;
     QGridLayout layout;

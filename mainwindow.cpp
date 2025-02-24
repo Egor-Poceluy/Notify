@@ -2,39 +2,26 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , notification(new Notification())
-    , hours(new QLineEdit())
-    , minutes(new QLineEdit())
+    : QMainWindow(parent), ui(new Ui::MainWindow), notification(new Notification())
 {
     ui->setupUi(this);
-    setFixedSize(350, 200);
+    setFixedSize(350, 400);
+    setWindowTitle("Notify");
 
-    QRegExpValidator *hourValidator = new QRegExpValidator(QRegExp("^([01]?[0-9]|2[0-3])$"), this);
-    QRegExpValidator *minuteValidator = new QRegExpValidator(QRegExp("^([0-5]?[0-9])$"), this);
+    QPushButton *settingsButton = new QPushButton(this);
+    settingsButton->setIcon(QIcon(":/icons/settings.png"));
+    connect(settingsButton, &QPushButton::clicked, this, &MainWindow::settingButton_clicked);
 
-    hours->setAlignment(Qt::AlignRight);
-    hours->setValidator(hourValidator);
-
-    QLabel* colon = new QLabel(":");
-
-    minutes->setAlignment(Qt::AlignLeft);
-    minutes->setValidator(minuteValidator);
+    QPushButton *createNotificationButton = new QPushButton("+ Создать уведомление", this);
+    connect(createNotificationButton, &QPushButton::clicked, this, &MainWindow::createNotificationButton_clicked);
 
 
-    QPushButton *notifyButton = new QPushButton("Создать напоминание");
-    connect(notifyButton, &QPushButton::clicked, this, &MainWindow::notifyButton_clicked);
+    QHBoxLayout *btnLayout = new QHBoxLayout();
+    btnLayout->addWidget(createNotificationButton);
+    btnLayout->addWidget(settingsButton);
 
-
-    QHBoxLayout *clockLayout = new QHBoxLayout(this);
-    clockLayout->addWidget(hours);
-    clockLayout->addWidget(colon);
-    clockLayout->addWidget(minutes);
-
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->addLayout(clockLayout);
-    mainLayout->addWidget(notifyButton);
+    QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->addLayout(btnLayout);
 
     QWidget *centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
@@ -44,32 +31,65 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete notification;
     delete ui;
 }
 
 
-void MainWindow::notifyButton_clicked()
+void MainWindow::createNotificationButton_clicked()
 {
-    int inputHour = hours->text().toInt();
-    int inputMinute = minutes->text().toInt();
+    if (createWindow != nullptr) {
+        createWindow->raise();
+        createWindow->activateWindow();
+        return;
+    }
 
-    QTime targetTime(inputHour, inputMinute);
+    createWindow = new CreateWindow(this);
+    connect(createWindow, &CreateWindow::createNotification, this, &MainWindow::handleCreateNotification);
+    connect(createWindow, &QWidget::destroyed, this, [this]() { createWindow = nullptr; });
 
+    createWindow->show();
+}
+
+
+void MainWindow::settingButton_clicked()
+{
+    if (settingsWindow != nullptr) {
+        settingsWindow->raise();
+        settingsWindow->activateWindow();
+        return;
+    }
+
+    settingsWindow = new Settings(this);
+    connect(settingsWindow, &QWidget::destroyed, this, [this]() { settingsWindow = nullptr; });
+
+    settingsWindow->show();
+}
+
+
+void MainWindow::notify(const QString& message, const QString& soundName)
+{
+    notification->setMessage(message);
+    notification->setSound(soundName);
+    notification->show();
+}
+
+
+void MainWindow::handleCreateNotification(int hours, int minutes, const QString& message, const QString& soundName)
+{
+    QTime targetTime(hours, minutes);
     int msecsDifference = QTime::currentTime().msecsTo(targetTime);
 
     if (msecsDifference < 0)
         msecsDifference += (24 * 60 * 60 * 1000);
 
-    timer = new QTimer(this);
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [this, timer, message, soundName]() {
+        notify(message, soundName);
+        timers.removeOne(timer);
+        timer->deleteLater();
+    });
+
     timer->start(msecsDifference);
-
-    connect(timer, &QTimer::timeout, this, &MainWindow::notify);
-}
-
-
-void MainWindow::notify()
-{
-    timer->stop();
-    notification->setMessage("TEST TEST TEST");
-    notification->show();
+    timers.append(timer);
 }

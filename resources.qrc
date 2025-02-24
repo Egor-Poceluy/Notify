@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/settings.png</file>
+        <file>sounds/default.wav</file>
+        <file>sounds/ring.wav</file>
+    </qresource>
+</RCC>

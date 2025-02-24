@@ -1,16 +1,15 @@
+#pragma once
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include "notification.h"
+#include "settingswindow.h"
+#include "createwindow.h"
 
 #include <QMainWindow>
-
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QRegExpValidator>
 #include <QTime>
+#include <QList>
+#include <QTableWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,17 +24,20 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void notify(QTimer* timer, const QString& msg = "Это пустое уведомление");
 
-public slots:
-    void notifyButton_clicked();
-    void notify();
+private slots:
+    void settingButton_clicked();
+    void createNotificationButton_clicked();
+    void handleCreateNotification(int hours, int minutes, const QString& message, const QString& soundName);
 
 private:
     Ui::MainWindow *ui;
-    Notification *notification;
+    void notify(const QString& message, const QString& soundName);
 
-    QLineEdit *hours;
-    QLineEdit *minutes;
-    QTimer *timer;
+    Notification *notification;
+    Settings *settingsWindow = nullptr;
+    CreateWindow *createWindow = nullptr;
+    QList<QTimer*> timers;
 };
 #endif // MAINWINDOW_H

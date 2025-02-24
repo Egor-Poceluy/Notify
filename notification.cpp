@@ -3,9 +3,9 @@
 #include <QPainter>
 #include <QApplication>
 #include <QDesktopWidget>
-
+#include <QUrl>
 Notification::Notification(QWidget *parent)
-    : QWidget{parent}, timer(new QTimer())
+    : QWidget{parent}, notificationLifeTime(3000), progress(1.0), ring(new QSoundEffect(this)), timer(new QTimer())
 {
     setWindowFlags(Qt::FramelessWindowHint |
                    Qt::Tool |
@@ -22,13 +22,13 @@ Notification::Notification(QWidget *parent)
 
 
     label.setAlignment(Qt::AlignCenter);
-    label.setStyleSheet("color: white");
-
+    label.setStyleSheet("color: black;");
+    label.setFixedSize(320, 100);
 
     layout.addWidget(&label);
     setLayout(&layout);
 
-    connect(timer, &QTimer::timeout, this, &Notification::hideAnimation);
+    connect(timer, &QTimer::timeout, this, &Notification::calculateTime);
 }
 
 
@@ -37,15 +37,23 @@ void Notification::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QRect notifyRect;
-    notifyRect.setX(rect().x() + 5);
-    notifyRect.setY(rect().y() + 5);
-    notifyRect.setSize(QSize(rect().width() - 10, rect().height() - 10));
+    QRect notifyRect = rect();
+    notifyRect.setX(notifyRect.x());
+    notifyRect.setY(notifyRect.y());
+    notifyRect.setSize(QSize(notifyRect.width(), notifyRect.height()));
 
-    painter.setBrush(QBrush(QColor(0, 0, 0, 180)));
+    painter.setBrush(QBrush(QColor(255, 255, 255)));
     painter.setPen(Qt::NoPen);
+    painter.drawRect(notifyRect);
 
-    painter.drawRoundedRect(notifyRect, 10, 10);
+    QRect progressRect;
+    progressRect.setX(notifyRect.x());
+    progressRect.setY(notifyRect.y());
+    progressRect.setSize(QSize(rect().width() * progress, 4));
+
+    painter.setBrush(QBrush(QColor(0, 122, 255)));
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(progressRect);
 }
 
 
@@ -71,9 +79,14 @@ void Notification::setTransparency(float _transparency)
 
 void Notification::show()
 {
+    if(notificationLifeTime < 3000)
+        notificationLifeTime = 3000;
+
     animation.setDuration(500);
     animation.setStartValue(0);
     animation.setEndValue(1);
+
+    ring->play();
 
     setGeometry(QApplication::desktop()->availableGeometry().width() - 36 - width() + QApplication::desktop() -> availableGeometry().x(),
                 QApplication::desktop()->availableGeometry().height() - 36 - height() + QApplication::desktop() -> availableGeometry().y(),
@@ -82,7 +95,7 @@ void Notification::show()
     QWidget::show();
 
     animation.start();
-    timer->start(5000);
+    timer->start(10);
 }
 
 
@@ -94,4 +107,23 @@ void Notification::hideAnimation()
     animation.setEndValue(0.0);
 
     animation.start();
+}
+
+
+void Notification::calculateTime()
+{
+    notificationLifeTime -= 10;
+    progress = static_cast<float>(notificationLifeTime) / 3000.0f;
+    if(notificationLifeTime <= 0) {
+        timer->stop();
+        hideAnimation();
+    }
+    update();
+}
+
+
+void Notification::setSound(const QString& path, int volume)
+{
+    ring->setSource(QUrl("qrc:/sounds/" + path + ".wav"));
+    ring->setVolume(volume);
 }
