@@ -5,5 +5,6 @@
         <file>sounds/ring.wav</file>
         <file>icons/delete.png</file>
         <file>icons/notify.png</file>
+        <file>icons/app-icon.png</file>
     </qresource>
 </RCC>

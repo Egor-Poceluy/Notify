@@ -5,7 +5,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), notification(new Notification()), currentTimers(new QTableWidget())
+    : QMainWindow(parent), ui(new Ui::MainWindow), notification(new Notification()), currentTimers(new QTableWidget()), trayIcon(new QSystemTrayIcon(this))
 {
     ui->setupUi(this);
     setFixedSize(350, 400);
@@ -14,8 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *settingsButton = new QPushButton(this);
     settingsButton->setIcon(QIcon(":/icons/settings.png"));
     connect(settingsButton, &QPushButton::clicked, this, &MainWindow::settingButton_clicked);
-
-    //QSpacerItem *spacer = new QSpacerItem(10, 10, QSizePolicy::MinimumExpanding);
+    setWindowIcon(QIcon(":/icons/app-icon.png"));
 
     QPushButton *createNotificationButton = new QPushButton(this);
     createNotificationButton->setIcon(QIcon(":/icons/notify.png"));
@@ -28,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QHBoxLayout *btnLayout = new QHBoxLayout();
     btnLayout->addWidget(createNotificationButton);
-    //btnLayout->addSpacerItem(spacer);
     btnLayout->addWidget(settingsButton);
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
@@ -38,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     QWidget *centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
     setCentralWidget(centralWidget);
+
+    setupTrayIcon();
+    this->hide();
 }
 
 
@@ -150,4 +151,35 @@ void MainWindow::addTimerToTable(const QString& time, QTimer* timer)
                 timers.at(i)->setProperty("row", i);
         }
     });
+}
+
+
+void MainWindow::setupTrayIcon()
+{
+    trayIcon->setIcon(QIcon(":/icons/app-icon.png"));
+
+    QMenu *trayMenu = new QMenu(this);
+    QAction *openAction = new QAction("Открыть", this);
+    QAction *quitAction = new QAction("Выйти", this);
+
+    trayMenu->addAction(openAction);
+    trayMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayMenu);
+
+    connect(openAction, &QAction::triggered, this, &MainWindow::show);
+    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+
+    trayIcon->show();
+}
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    this->hide();
+
+    if (trayIcon) {
+        trayIcon->showMessage("Notify", "Приложение свернуто в трей");
+    }
+
+    event->ignore();
 }

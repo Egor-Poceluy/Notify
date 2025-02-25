@@ -3,10 +3,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QCloseEvent>
 #include <QTime>
 #include <QList>
 #include <QTableWidget>
-#include <QSpacerItem>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QAction>
 
 class Notification;
 class Settings;
@@ -28,6 +31,9 @@ public:
     void notify(QTimer* timer, const QString& msg = "Это пустое уведомление");
     void addTimerToTable(const QString& time, QTimer* timer);
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void settingButton_clicked();
     void createNotificationButton_clicked();
@@ -36,11 +42,13 @@ private slots:
 private:
     Ui::MainWindow *ui;
     void notify(const QString& message, const QString& soundName);
+    void setupTrayIcon();
 
     Notification *notification;
     Settings *settingsWindow = nullptr;
     CreateWindow *createWindow = nullptr;
     QList<QTimer*> timers;
     QTableWidget *currentTimers;
+    QSystemTrayIcon *trayIcon;
 };
 #endif // MAINWINDOW_H
