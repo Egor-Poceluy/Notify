@@ -2,14 +2,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "notification.h"
-#include "settingswindow.h"
-#include "createwindow.h"
-
 #include <QMainWindow>
 #include <QTime>
 #include <QList>
 #include <QTableWidget>
+#include <QSpacerItem>
+
+class Notification;
+class Settings;
+class CreateWindow;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,6 +26,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void notify(QTimer* timer, const QString& msg = "Это пустое уведомление");
+    void addTimerToTable(const QString& time, QTimer* timer);
 
 private slots:
     void settingButton_clicked();
@@ -39,5 +41,6 @@ private:
     Settings *settingsWindow = nullptr;
     CreateWindow *createWindow = nullptr;
     QList<QTimer*> timers;
+    QTableWidget *currentTimers;
 };
 #endif // MAINWINDOW_H
