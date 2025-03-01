@@ -1,10 +1,12 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
+#include "notificationmanager.h"
+
+#include <QPushButton>
 
 Settings::Settings(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::Settings)
-    , notification(new Notification())
 {
     ui->setupUi(this);
 
@@ -14,7 +16,9 @@ Settings::Settings(QWidget *parent)
 
     QPushButton *testNotificationButton = new QPushButton("test");
 
-    connect(testNotificationButton, &QPushButton::clicked, this, &Settings::testNotify);
+    connect(testNotificationButton, &QPushButton::clicked, this, []{
+        NotificationManager::createNotificationManager().showNotification("ТЕСТОВОЕ СООБЩЕНИЕ", "default");
+    });
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(testNotificationButton);
@@ -23,11 +27,4 @@ Settings::Settings(QWidget *parent)
 Settings::~Settings()
 {
     delete ui;
-}
-
-
-void Settings::testNotify()
-{
-    notification->setMessage("ЭТО ТЕСТОВОЕ СООБЩЕНИЕ!!!");
-    notification->show();
 }

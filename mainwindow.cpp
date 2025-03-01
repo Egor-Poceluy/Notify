@@ -1,11 +1,8 @@
 #include "mainwindow.h"
-#include "notification.h"
-#include "settingswindow.h"
-#include "createwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), notification(new Notification()), currentTimers(new QTableWidget()), trayIcon(new QSystemTrayIcon(this))
+    : QMainWindow(parent), ui(new Ui::MainWindow), currentTimers(new QTableWidget(this)), timeManager(new TimerManager(currentTimers, this)), trayIcon(new QSystemTrayIcon(this))
 {
     ui->setupUi(this);
     setFixedSize(350, 400);
@@ -37,15 +34,15 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidget->setLayout(mainLayout);
     setCentralWidget(centralWidget);
 
+    timeManager->loadTimers();
     setupTrayIcon();
-    this->hide();
+    //this->hide();
 }
 
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete notification;
 }
 
 
@@ -75,82 +72,13 @@ void MainWindow::settingButton_clicked()
 
     settingsWindow = new Settings(this);
     connect(settingsWindow, &QWidget::destroyed, this, [this]() { settingsWindow = nullptr; });
-
     settingsWindow->show();
-}
-
-
-void MainWindow::notify(const QString& message, const QString& soundName)
-{
-    notification->setMessage(message);
-    notification->setSound(soundName);
-    notification->show();
 }
 
 
 void MainWindow::handleCreateNotification(int hours, int minutes, const QString& message, const QString& soundName)
 {
-    QTime targetTime(hours, minutes);
-    int msecsDifference = QTime::currentTime().msecsTo(targetTime);
-
-    if (msecsDifference < 0)
-        msecsDifference += (24 * 60 * 60 * 1000);
-
-    QTimer *timer = new QTimer(this);
-    int row = currentTimers->rowCount();
-    timer->setProperty("row", row);
-
-    connect(timer, &QTimer::timeout, this, [this, timer, message, soundName]() {
-        notify(message, soundName);
-        timers.removeOne(timer);
-        timer->deleteLater();
-
-        int row = timer->property("row").toInt();
-
-        if(row >= 0 && row < currentTimers->rowCount()){
-            currentTimers->removeRow(row);
-
-            for (int i = row; i < currentTimers->rowCount(); ++i)
-                timers.at(i)->setProperty("row", i);
-        }
-    });
-
-    timer->start(msecsDifference);
-    timers.append(timer);
-
-    QString time = QString("%1 : %2")
-                       .arg(hours, 2, 10, QLatin1Char('0'))
-                       .arg(minutes, 2, 10, QLatin1Char('0'));
-
-    addTimerToTable(time, timer);
-}
-
-
-void MainWindow::addTimerToTable(const QString& time, QTimer* timer)
-{
-    int row = currentTimers->rowCount();
-    currentTimers->insertRow(row);
-
-    QTableWidgetItem *timeItem = new QTableWidgetItem(time);
-    currentTimers->setItem(row, 0, timeItem);
-
-    QPushButton *deleteButton = new QPushButton();
-    deleteButton->setIcon(QIcon(":/icons/delete.png"));
-    currentTimers->setCellWidget(row, 1, deleteButton);
-
-    connect(deleteButton, &QPushButton::clicked, this, [this, timer]() {
-        timers.removeOne(timer);
-        timer->deleteLater();
-
-        int row = timer->property("row").toInt();
-
-        if(row >= 0 && row < currentTimers->rowCount()){
-            currentTimers->removeRow(row);
-
-            for (int i = row; i < currentTimers->rowCount(); ++i)
-                timers.at(i)->setProperty("row", i);
-        }
-    });
+    timeManager->addTimer(hours, minutes, message, soundName);
 }
 
 
@@ -167,8 +95,10 @@ void MainWindow::setupTrayIcon()
     trayIcon->setContextMenu(trayMenu);
 
     connect(openAction, &QAction::triggered, this, &MainWindow::show);
-    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
-
+    connect(quitAction, &QAction::triggered, qApp, [this](){
+        timeManager->saveTimers();
+        QApplication::quit();
+    });
     trayIcon->show();
 }
 
@@ -176,10 +106,6 @@ void MainWindow::setupTrayIcon()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     this->hide();
-
-    if (trayIcon) {
-        trayIcon->showMessage("Notify", "Приложение свернуто в трей");
-    }
-
+    trayIcon->showMessage("Notify", "Приложение свернуто в трей");
     event->ignore();
 }

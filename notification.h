@@ -6,8 +6,11 @@
 #include <QGridLayout>
 #include <QPropertyAnimation>
 #include <QTimer>
-#include <QMediaPlayer>
 #include <QSoundEffect>
+#include <QPainter>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QUrl>
 
 class Notification : public QWidget
 {
@@ -26,6 +29,9 @@ public slots:
 
 private slots:
     void calculateTime();
+
+signals:
+    void closed();
 
 private:
     float getTransparency() const noexcept;

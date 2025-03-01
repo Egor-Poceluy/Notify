@@ -21,15 +21,18 @@ CreateWindow::CreateWindow(QWidget *parent)
     minutes->setAlignment(Qt::AlignLeft);
     minutes->setValidator(minuteValidator);
 
-
     msg->setPlaceholderText("Ваше сообщение...");
 
-
     QComboBox *sounds = new QComboBox();
-    sounds->addItem("Звук1", "default");
-    sounds->addItem("Звук2", "ring");
-    soundName = sounds->itemData(sounds->currentIndex()).toString();
+    sounds->addItem("Обычный", "default");
+    sounds->addItem("Спокойный1", "ring1");
+    sounds->addItem("Спокойный2", "ring2");
+    sounds->addItem("Спокойный3", "ring3");
+    sounds->addItem("Спокойный4", "ring4");
+    sounds->addItem("Задорный", "funny");
 
+
+    soundName = sounds->itemData(sounds->currentIndex()).toString();
     connect(sounds, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, sounds](int index) {
         soundName = sounds->itemData(sounds->currentIndex()).toString();
     });
@@ -43,7 +46,6 @@ CreateWindow::CreateWindow(QWidget *parent)
             QString message = msg->text();
             emit createNotification(h, m, message, soundName);
         }
-        // вывод в статус бар если пустое время
     });
 
 

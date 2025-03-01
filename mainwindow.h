@@ -2,18 +2,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "timermanager.h"
+#include "settingswindow.h"
+#include "createwindow.h"
+
 #include <QMainWindow>
 #include <QCloseEvent>
-#include <QTime>
-#include <QList>
-#include <QTableWidget>
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
-
-class Notification;
-class Settings;
-class CreateWindow;
+#include <QTableWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,16 +37,18 @@ private slots:
     void createNotificationButton_clicked();
     void handleCreateNotification(int hours, int minutes, const QString& message, const QString& soundName);
 
+signals:
+    void createNotification(int hours, int minutes, const QString& message, const QString& soundName);
+
 private:
     Ui::MainWindow *ui;
-    void notify(const QString& message, const QString& soundName);
     void setupTrayIcon();
 
-    Notification *notification;
+    QTableWidget *currentTimers;
+    TimerManager *timeManager;
     Settings *settingsWindow = nullptr;
     CreateWindow *createWindow = nullptr;
     QList<QTimer*> timers;
-    QTableWidget *currentTimers;
     QSystemTrayIcon *trayIcon;
 };
 #endif // MAINWINDOW_H

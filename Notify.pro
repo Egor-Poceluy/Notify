@@ -1,6 +1,6 @@
 QT       += core gui
 QT       += multimedia
-
+QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,13 +15,17 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     notification.cpp \
-    settingswindow.cpp
+    notificationmanager.cpp \
+    settingswindow.cpp \
+    timermanager.cpp
 
 HEADERS += \
     createwindow.h \
     mainwindow.h \
     notification.h \
-    settingswindow.h
+    notificationmanager.h \
+    settingswindow.h \
+    timermanager.h
 
 FORMS += \
     createwindow.ui \
