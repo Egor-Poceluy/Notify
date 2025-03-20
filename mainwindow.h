@@ -4,7 +4,7 @@
 
 #include "timermanager.h"
 #include "settingswindow.h"
-#include "createwindow.h"
+#include "makenotification.h"
 
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -28,8 +28,6 @@ public:
     ~MainWindow();
     void notify(QTimer* timer, const QString& msg = "Это пустое уведомление");
     void addTimerToTable(const QString& time, QTimer* timer);
-
-protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:

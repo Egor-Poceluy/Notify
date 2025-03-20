@@ -102,13 +102,13 @@ void TimerManager::saveTimers()
         notificationObject["soundName"] = soundName;
 
         notificationArray.append(notificationObject);
+    }
 
-        QJsonDocument document(notificationArray);
-        QFile file("notification.json");
-        if(file.open(QIODevice::WriteOnly)) {
-            file.write(document.toJson());
-            file.close();
-        }
+    QJsonDocument document(notificationArray);
+    QFile file("notification.json");
+    if(file.open(QIODevice::WriteOnly)) {
+        file.write(document.toJson());
+        file.close();
     }
 }
 

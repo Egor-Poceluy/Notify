@@ -1,5 +1,5 @@
-#include "createwindow.h"
-#include "ui_createwindow.h"
+#include "makenotification.h"
+#include "ui_makenotification.h"
 
 CreateWindow::CreateWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::CreateWindow), hours(new QLineEdit()), minutes(new QLineEdit()), msg(new QLineEdit())

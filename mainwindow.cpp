@@ -95,7 +95,7 @@ void MainWindow::setupTrayIcon()
     trayIcon->setContextMenu(trayMenu);
 
     connect(openAction, &QAction::triggered, this, &MainWindow::show);
-    connect(quitAction, &QAction::triggered, qApp, [this](){
+    connect(quitAction, &QAction::triggered, qApp, [this]() {
         timeManager->saveTimers();
         QApplication::quit();
     });

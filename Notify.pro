@@ -11,25 +11,25 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    createwindow.cpp \
     main.cpp \
     mainwindow.cpp \
+    makenotification.cpp \
     notification.cpp \
     notificationmanager.cpp \
     settingswindow.cpp \
     timermanager.cpp
 
 HEADERS += \
-    createwindow.h \
     mainwindow.h \
+    makenotification.h \
     notification.h \
     notificationmanager.h \
     settingswindow.h \
     timermanager.h
 
 FORMS += \
-    createwindow.ui \
     mainwindow.ui \
+    makenotification.ui \
     settingswindow.ui
 
 # Default rules for deployment.
